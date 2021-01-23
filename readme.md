@@ -11,6 +11,9 @@ In essence, there are 2 features :
 1. **monitoring mode**, which will see all clients connected to the OpenVPN server, including the number of bytes sent / received, and the last time connected to the OpenVPN network ... the source of the information is from the `/var/log/openvpn/status.log` file
 2. **ip mode**, to list all of static IPs used by clients ... the source of the information is from the `/etc/openvpn/ipp.txt` file
 
+<br/>
+
+:warning: **Note** : run this script on OpenVPN Server, not on OpenVPN client / Agent
 
 <br/><br/>
 ### USAGE
