@@ -1,0 +1,64 @@
+#!/bin/env bash
+
+_VERSION_="V1.3.0"
+
+
+clear
+cols=$(tput cols)
+rows=$(tput lines)
+active_client=0
+
+function Monitoring() {
+	while [[ True ]]; do
+		grep_data=$(cat /var/log/openvpn/status.log | sed -n '/OpenVPN CLIENT LIST/,/ROUTING TABLE/p' | tail -n+4 | sed 's/ROUTING TABLE//g' | head -n -1 | sort | nl -n ln -w 1 -s ') ')
+		parsing_data=$(echo "$grep_data" | awk -F  ',' '{printf "\r%-23s %-25s %9.1f %-9s %9.1f %-7s %-1s\n", $1, $2, $3/1000000, "MB ", $4/1000000, "MB ", $5}')
+
+		if [[ $(tput cols) -ne $cols || $(tput lines) -ne $rows ]]; then
+				cols=$(tput cols)
+				rows=$(tput lines)
+				clear
+		fi
+
+		connected_client=$(printf "$grep_data" | wc -l)
+		if [[ $connected_client -ne $active_client ]]; then
+			active_client=$connected_client
+			clear
+		fi
+		
+		printf """
+			\t ./ Monitoring OpenVPN Client by berrabe - $_VERSION_ \.
+
+
+			\r[+] $(date)
+
+
+			\rNo Client Name \t\tReal Address \t\tBytes Received  \tBytes Sent  \tConnected Since
+			\r----------------------------------------------------------------------------------------------------------------
+			$parsing_data
+		"""
+		tput cup 0 0
+		sleep 1
+
+	done
+}
+
+
+function showip() {
+	clear
+
+	grep_ip=$(cat /etc/openvpn/ipp.txt | nl -n ln -w 1 -s ') ' | awk -F ',' '{printf "\r%-25s %-1s\n",$1,$2}')
+	printf """
+		\rNo Client Name \t\t  IP
+		\r----------------------------------------
+		$grep_ip\n
+	"""
+}
+
+
+if [[ $1 == 'ip' ]]; then
+	showip
+fi
+
+if [[ $1 == 'mon' ]]; then
+	Monitoring
+fi
